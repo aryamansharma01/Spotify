@@ -52,12 +52,14 @@ data = json.load(f)
 f.close()
 track_id = []
 track_name = []
-
+album_name = []
+artist_name = []
 # creating arrays for storing id and name
 for i in recentsongs['items']:
     track_id.append(i['track']['id'])
     track_name.append(i['track']['name'])
-
+    album_name.append(i['track']['album']['name'])
+    artist_name.append(i['track']['artists'][0]['name'])
 # accessing features of all 50 tracks
 features = []
 tracks = {}
@@ -71,6 +73,8 @@ for i in range(0, 49):
     tracks[i+1]['number'] = i+1
     tracks[i+1]['name'] = track_name[i]
     tracks[i+1]['id'] = track_id[i]
+    tracks[i+1]['album'] = album_name[i]
+    tracks[i+1]['artist'] = artist_name[i]
     tracks[i+1]['acousticness'] = features[i][0]['acousticness']
     tracks[i+1]['danceability'] = features[i][0]['danceability']
     tracks[i+1]['energy'] = features[i][0]['energy']
@@ -84,9 +88,9 @@ for i in range(0, 49):
     tracks[i+1]['popularity'] = pop['popularity']
 
 # creating dictionary to convert into dataframe
-feature = ['number', 'name', 'id', 'acousticness', 'danceability', 'energy',
-           'instrumentalness', 'liveness', 'loudness', 'speechiness', 'tempo', 'valence',
-           'popularity']
+feature = ['number', 'name', 'id', 'album', 'artist', 'acousticness',
+           'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness',
+           'speechiness', 'tempo', 'valence', 'popularity']
 dic_df = {}
 
 # initialising dictionary
@@ -116,3 +120,10 @@ venn2_unweighted(subsets=(less_count, more_count, middle_count),
                  alpha=0.5)
 dataframe.plot.line(x='number', y=['danceability', 'energy', 'valence'])
 plt.show()
+
+# if the graph is erratic, thay maybe because of streaming of a particular artist/ album,
+# since an album contains a mixture of sad and energetic songs. so we take a look
+# at the number of unique artists and albums in the history :
+
+print(dataframe['album'].value_counts(ascending=False))
+print(dataframe['artist'].value_counts(ascending=False))
