@@ -1,13 +1,15 @@
-import types
-import pandas as pd
-import json
-import requests
-import sys
-import spotipy
-import spotipy.util as util
-from spotipy.oauth2 import SpotifyClientCredentials
-# from config.config import USERNAME, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRETSPOTIPY_REDIRECT_URI
 from bs4 import BeautifulSoup
+from spotipy.oauth2 import SpotifyClientCredentials
+import spotipy.util as util
+import spotipy
+import sys
+import requests
+import json
+import pandas as pd
+import types
+from matplotlib import pyplot as plt
+from matplotlib_venn import venn3, venn3_circles
+from matplotlib_venn import venn2, venn2_circles, venn2_unweighted
 
 
 # for acessing private playlists
@@ -20,6 +22,8 @@ client_credentials_manager = SpotifyClientCredentials(client_id, client_secret)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 token = util.prompt_for_user_token(username, scope, client_id, client_secret,
                                    redirect_uri)
+
+# accessing last 50 tracks frpm history
 
 
 def current_user_recently_played(self, limit=50):
@@ -36,26 +40,31 @@ token = util.prompt_for_user_token(
 spotify = spotipy.Spotify(auth=token)
 spotify.current_user_recently_played = types.MethodType(current_user_recently_played, spotify)
 
+# creating .json file
 recentsongs = spotify.current_user_recently_played(limit=50)
 out_file = open("recentsongs.json", "w")
 out_file.write(json.dumps(recentsongs, sort_keys=True, indent=2))
 out_file.close()
 
-# print(json.dumps(recentsongs, sort_keys=True, indent=2))
-# track = json.dumps(recentsongs, sort_keys=True, indent=2)
+
 f = open('recentsongs.json',)
 data = json.load(f)
 f.close()
 track_id = []
 track_name = []
+
+# creating arrays for storing id and name
 for i in recentsongs['items']:
     track_id.append(i['track']['id'])
     track_name.append(i['track']['name'])
 
+# accessing features of all 50 tracks
 features = []
 tracks = {}
 for track in track_id:
     features.append(sp.audio_features(track))
+
+# initialising all tracks with corresponding feature values and storing in a dictionary
 for i in range(0, 49):
     tracks[i+1] = {}
 for i in range(0, 49):
@@ -73,14 +82,37 @@ for i in range(0, 49):
     tracks[i+1]['valence'] = features[i][0]['valence']
     pop = sp.track(track_id[i])
     tracks[i+1]['popularity'] = pop['popularity']
+
+# creating dictionary to convert into dataframe
 feature = ['number', 'name', 'id', 'acousticness', 'danceability', 'energy',
            'instrumentalness', 'liveness', 'loudness', 'speechiness', 'tempo', 'valence',
            'popularity']
 dic_df = {}
+
+# initialising dictionary
 for x in feature:
     dic_df[x] = []
 for j in range(1, 50):
     for x in feature:
         dic_df[x].extend([tracks[j][x]])
-dataframe = pd.DataFrame.from_dict(dic_df)
+
+# creating dataframe from dictionary
+dataframe = pd.DataFrame.from_dict(dic_df).drop_duplicates(subset='name')
+pd.set_option('display.width', None)
 print(dataframe)
+valence_vals = dataframe['valence'].tolist()
+less_count, more_count, middle_count = 0, 0, 0
+for num in valence_vals:
+
+    if num >= 0 and num < 0.5:
+        less_count += 1
+    elif num >= 0.5 and num < 0.6:
+        middle_count += 1
+    else:
+        more_count += 1
+
+venn2_unweighted(subsets=(less_count, more_count, middle_count),
+                 set_labels=('Low Spirit', 'High Spirit'), set_colors=('navy', 'lime'),
+                 alpha=0.5)
+dataframe.plot.line(x='number', y=['danceability', 'energy', 'valence'])
+plt.show()
