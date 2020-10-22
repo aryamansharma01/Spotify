@@ -1,4 +1,3 @@
-from bs4 import BeautifulSoup
 from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy.util as util
 import spotipy
@@ -71,9 +70,9 @@ for track in track_id:
     features.append(sp.audio_features(track))
 
 # initialising all tracks with corresponding feature values and storing in a dictionary
-for i in range(50):
+for i in range(len(track_name)):
     tracks[i+1] = {}
-for i in range(50):
+for i in range(len(track_name)):
     tracks[i+1]['number'] = i+1
     tracks[i+1]['time'] = track_time[i]
     tracks[i+1]['name'] = track_name[i]
@@ -101,9 +100,9 @@ dic_df = {}
 # initialising dictionary
 for x in feature:
     dic_df[x] = []
-for j in range(1, 50):
+for j in range(len(track_name)):
     for x in feature:
-        dic_df[x].extend([tracks[j][x]])
+        dic_df[x].extend([tracks[j+1][x]])
 
 # creating dataframe from dictionary
 dataframe = pd.DataFrame.from_dict(dic_df).drop_duplicates(subset='name')

@@ -71,8 +71,9 @@ for i in range(len(track_name)):
     songlyrics = song.lyrics.replace("\n", " ").replace("\\'", "\'")
     lyrics[track_name[i]] = songlyrics
     songlyrics = songlyrics.replace('(', '').replace(')', '')
-    text.append(re.sub("[\\[].*?[\\]]", "", songlyrics))
-    scores = sid.polarity_scores(text[i])
+    songlyrics = re.sub("[\\[].*?[\\]]", "", songlyrics)
+    text.append(songlyrics)
+    scores = sid.polarity_scores(songlyrics)
     compoundscore.append(scores['compound'])
 text = ' '.join(map(str, text))
 print(text.encode("utf-8"))
