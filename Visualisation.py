@@ -130,7 +130,7 @@ plt.show()
 # at the number of unique artists and albums in the history :
 for ft in ['danceability', 'energy', 'valence']:
     print(ft)
-    print("\nMean : %s\t" % (average(dataframe[ft])))
+    print("\nMean : %s\t" % (Average(dataframe[ft])))
     print("SD : %s\n" % (statistics.stdev(dataframe[ft])))
 # print(dataframe['album'].value_counts(ascending=False))
 # print(dataframe['artist'].value_counts(ascending=False))
