@@ -54,22 +54,23 @@ spotify.current_user_recently_played = types.MethodType(current_user_recently_pl
 
 # creating .json file
 recentsongs = spotify.current_user_recently_played(limit=50)
-track_name = []
-album_name = []
-artist_name = []
+track_details = []
 # creating arrays for storing id and name
 for i in recentsongs['items']:
-    track_name.append(i['track']['name'])
-    artist_name.append(i['track']['artists'][0]['name'])
+    temp = {'name': '', 'artist': ''}
+    temp['name'] = i['track']['name']
+    temp['artist'] = i['track']['artists'][0]['name']
+    track_details.append(temp)
 lyrics = {}
 text = []
 compoundscore = []
 sid = SentimentIntensityAnalyzer()
-track_name = list(dict.fromkeys(track_name))
-for i in range(len(track_name)):
-    song = genius.search_song(track_name[i], artist_name[i])
+track_details = {frozenset(item.items()): item for item in track_details}.values()
+print(track_details)
+for i in track_details:
+    song = genius.search_song(i['name'], i['artist'])
     songlyrics = song.lyrics.replace("\n", " ").replace("\\'", "\'")
-    lyrics[track_name[i]] = songlyrics
+    lyrics[i['name']] = songlyrics
     songlyrics = songlyrics.replace('(', '').replace(')', '')
     songlyrics = re.sub("[\\[].*?[\\]]", "", songlyrics)
     text.append(songlyrics)
