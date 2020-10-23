@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from matplotlib_venn import venn3, venn3_circles
 from matplotlib_venn import venn2, venn2_circles, venn2_unweighted
 import re
-
+import statistics
 # for acessing private playlists
 scope = 'playlist-read-private'
 username = '8eia8ggl4ipbhouhun62o9y8i'
@@ -73,7 +73,6 @@ for track in track_id:
 for i in range(len(track_name)):
     tracks[i+1] = {}
 for i in range(len(track_name)):
-    tracks[i+1]['number'] = i+1
     tracks[i+1]['time'] = track_time[i]
     tracks[i+1]['name'] = track_name[i]
     tracks[i+1]['id'] = track_id[i]
@@ -92,7 +91,7 @@ for i in range(len(track_name)):
     tracks[i+1]['popularity'] = pop['popularity']
 
 # creating dictionary to convert into dataframe
-feature = ['number', 'time', 'name', 'id', 'album', 'artist', 'acousticness',
+feature = ['time', 'name', 'id', 'album', 'artist', 'acousticness',
            'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness',
            'speechiness', 'tempo', 'valence', 'popularity']
 dic_df = {}
@@ -105,7 +104,7 @@ for j in range(len(track_name)):
         dic_df[x].extend([tracks[j+1][x]])
 
 # creating dataframe from dictionary
-dataframe = pd.DataFrame.from_dict(dic_df).drop_duplicates(subset='name')
+dataframe = pd.DataFrame.from_dict(dic_df).iloc[::-1]  # .drop_duplicates(subset='name')
 pd.set_option('display.width', None)
 print(dataframe)
 valence_vals = dataframe['valence'].tolist()
@@ -129,6 +128,9 @@ plt.show()
 # if the graph is erratic, thay maybe because of streaming of a particular artist/ album,
 # since an album contains a mixture of sad and energetic songs. so we take a look
 # at the number of unique artists and albums in the history :
-
-print(dataframe['album'].value_counts(ascending=False))
-print(dataframe['artist'].value_counts(ascending=False))
+for ft in ['danceability', 'energy', 'valence']:
+    print(ft)
+    print("\nMean : %s\t" % (average(dataframe[ft])))
+    print("SD : %s\n" % (statistics.stdev(dataframe[ft])))
+# print(dataframe['album'].value_counts(ascending=False))
+# print(dataframe['artist'].value_counts(ascending=False))
