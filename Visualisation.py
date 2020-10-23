@@ -128,9 +128,9 @@ plt.show()
 # if the graph is erratic, thay maybe because of streaming of a particular artist/ album,
 # since an album contains a mixture of sad and energetic songs. so we take a look
 # at the number of unique artists and albums in the history :
-for ft in ['danceability', 'energy', 'valence']:
-    print(ft)
-    print("\nMean : %s\t" % (average(dataframe[ft])))
-    print("SD : %s\n" % (statistics.stdev(dataframe[ft])))
+#for ft in ['danceability', 'energy', 'valence']:
+#    print(ft)
+#    print("\nMean : %s\t" % (average(dataframe[ft])))
+#    print("SD : %s\n" % (statistics.stdev(dataframe[ft])))
 # print(dataframe['album'].value_counts(ascending=False))
 # print(dataframe['artist'].value_counts(ascending=False))
