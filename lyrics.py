@@ -52,67 +52,69 @@ token = util.prompt_for_user_token(
 spotify = spotipy.Spotify(auth=token)
 spotify.current_user_recently_played = types.MethodType(current_user_recently_played, spotify)
 
-# creating .json file
-recentsongs = spotify.current_user_recently_played(limit=50)
-track_details = []
-# creating arrays for storing id and name
-for i in recentsongs['items']:
-    temp = {'name': '', 'artist': ''}
-    temp['name'] = i['track']['name']
-    temp['artist'] = i['track']['artists'][0]['name']
-    track_details.append(temp)
-lyrics = {}
-text = []
-compoundscore = []
-sid = SentimentIntensityAnalyzer()
-track_details = {frozenset(item.items()): item for item in track_details}.values()
-print(track_details)
-for i in track_details:
-    song = genius.search_song(i['name'], i['artist'])
-    songlyrics = song.lyrics.replace("\n", " ").replace("\\'", "\'")
-    lyrics[i['name']] = songlyrics
-    songlyrics = songlyrics.replace('(', '').replace(')', '')
-    songlyrics = re.sub("[\\[].*?[\\]]", "", songlyrics)
-    text.append(songlyrics)
-    scores = sid.polarity_scores(songlyrics)
-    compoundscore.append(scores['compound'])
-text = ' '.join(map(str, text))
-print(text.encode("utf-8"))
-stopwords = set(stopwords.words('english'))
-stopwords.update(["br", "href", "la", "yeah", "yuh", "wan", "i'm"])
 
-sentences = sent_tokenize(text)
-words = word_tokenize(text)
-words_no_punc = []
-for w in words:
-    if w.isalpha():
-        words_no_punc.append(w.lower())
+def initial():
+    # creating .json file
+    recentsongs = spotify.current_user_recently_played(limit=50)
+    track_details = []
+    # creating arrays for storing id and name
+    for i in recentsongs['items']:
+        temp = {'name': '', 'artist': ''}
+        temp['name'] = i['track']['name']
+        temp['artist'] = i['track']['artists'][0]['name']
+        track_details.append(temp)
+   lyrics = {}
+   text = []
+   compoundscore = []
+   sid = SentimentIntensityAnalyzer()
+   track_details = {frozenset(item.items()): item for item in track_details}.values()
+   print(track_details)
+   for i in track_details:
+       song = genius.search_song(i['name'], i['artist'])
+       songlyrics = song.lyrics.replace("\n", " ").replace("\\'", "\'")
+       lyrics[i['name']] = songlyrics
+       songlyrics = songlyrics.replace('(', '').replace(')', '')
+       songlyrics = re.sub("[\\[].*?[\\]]", "", songlyrics)
+       text.append(songlyrics)
+       scores = sid.polarity_scores(songlyrics)
+       compoundscore.append(scores['compound'])
+   text = ' '.join(map(str, text))
+   print(text.encode("utf-8"))
+   stopwords = set(stopwords.words('english'))
+   stopwords.update(["br", "href", "la", "yeah", "yuh", "wan", "i'm"])
 
-ps = PorterStemmer()
-clean_words = []
-for w in words_no_punc:
-    if w not in stopwords:
-        clean_words.append(ps.stem(w))
-fdist = FreqDist(clean_words)
-print(fdist.most_common(10))
-fdist.plot(10)
+   sentences = sent_tokenize(text)
+   words = word_tokenize(text)
+   words_no_punc = []
+   for w in words:
+       if w.isalpha():
+           words_no_punc.append(w.lower())
 
-# making wordcloud
-words_string = ' '.join(map(str, clean_words))
-wordcloud = WordCloud(stopwords=stopwords).generate(words_string)
-plt.imshow(wordcloud, interpolation='bilinear')
-plt.axis("off")
-plt.show()
-print(compoundscore)
-plt.plot(compoundscore)
-plt.show()
-pos_count = 0
-neg_count = 0
-for num in compoundscore:
-    if num >= 0:
-        pos_count += 1
+   ps = PorterStemmer()
+   clean_words = []
+   for w in words_no_punc:
+       if w not in stopwords:
+           clean_words.append(ps.stem(w))
+   fdist = FreqDist(clean_words)
+   print(fdist.most_common(10))
+   fdist.plot(10)
 
-    else:
-        neg_count += 1
-plt.pie([pos_count, neg_count], labels=["Positive Songs", "Negative Songs"])
-plt.show()
+   # making wordcloud
+   words_string = ' '.join(map(str, clean_words))
+   wordcloud = WordCloud(stopwords=stopwords).generate(words_string)
+   plt.imshow(wordcloud, interpolation='bilinear')
+   plt.axis("off")
+   plt.show()
+   print(compoundscore)
+   plt.plot(compoundscore)
+   plt.show()
+   pos_count = 0
+   neg_count = 0
+   for num in compoundscore:
+       if num >= 0:
+           pos_count += 1
+
+       else:
+           neg_count += 1
+   plt.pie([pos_count, neg_count], labels=["Positive Songs", "Negative Songs"])
+   plt.show()
