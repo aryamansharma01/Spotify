@@ -11,5 +11,3 @@ A python program that makes use of Spotify's API to extract the last 50 listened
 
 * **Aryaman Sharma**
 * **Bhavya Nagpal**
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
